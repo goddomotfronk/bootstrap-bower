@@ -2542,6 +2542,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             var triggers = getTriggers( undefined );
             var hasEnableExp = angular.isDefined(attrs[prefix+'Enable']);
             var ttScope = scope.$new(true);
+            var tooltipInterval;
 
             var positionTooltip = function () {
 
@@ -2586,9 +2587,11 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             }
 
             function hideTooltipBind () {
-              scope.$apply(function () {
-                hide();
-              });
+            	tooltipInterval = $timeout(function() {
+            		scope.$apply(function () {
+                	hide();
+              	});
+            	}, 400);
             }
 
             // Show the tooltip popup element.
@@ -2608,10 +2611,19 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
                 return angular.noop;
               }
 
+							$document.find( '.tooltip' ).hide();
               createTooltip();
 
               // Set the initial positioning.
               tooltip.css({ top: 0, left: 0, display: 'block' });
+
+              tooltip.on('mouseover', function() {
+                $timeout.cancel(tooltipInterval);
+              });
+
+              tooltip.on('mouseout', function() {
+                hideTooltipBind();
+              });
 
               // Now we add it to the DOM because need some info about it. But it's not
               // visible yet anyway.
